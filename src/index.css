@@ -18,8 +18,10 @@
 body {
   margin: 0;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  min-width: 320px;
+  min-width: 350px;
   min-height: 100vh;
 }
 
@@ -128,4 +130,17 @@ body {
   place-items: center;
   cursor: pointer;
   font-size: 48px;
+}
+
+@media (max-width:450px) {
+  .square {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    font-size: 28px;
+  }
 }
