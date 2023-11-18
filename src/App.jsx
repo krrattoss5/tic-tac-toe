@@ -1,61 +1,28 @@
 import { useState } from 'react'
 import './App.css'
-
-const TURNS = {
-  X: 'x',
-  O: 'o'
-}
-
-
-const Square = ({children,isSelecteed,updateBoard,index})=>{
-  const className = `square ${isSelecteed ? 'is-selected' : ''}`
-
-  const handlerClick = ()=>{
-    updateBoard(index)
-  }
-
-  return (
-    <div className={className} onClick={handlerClick}>
-      {children}
-    </div>
-  )
-}
-
-const WINNER_COMBOS = [
-  [0,1,2],
-  [3,4,5],
-  [6,7,8],
-  [0,3,6],
-  [1,4,7],
-  [2,5,8],
-  [0,4,8],
-  [2,4,6]
-]
+import confetti from 'canvas-confetti'
+import Square from './Square'
+import { TURNS } from './constants'
+import { checkWinner,checkEndGame } from './logic/board'
+import { updateStorage,getStorage, clearStorage } from './logic/storage'
 
 function App() {
-  const [board, setBoard] = useState(Array(9).fill(null))
-  const [turn,setTurn] = useState(TURNS.X)
+  const [board, setBoard] = useState(()=>{
+  const getBoardFromLocalStorage = getStorage('board')
+  return getBoardFromLocalStorage ? JSON.parse(getBoardFromLocalStorage):
+  Array(9).fill(null)})
+  const [turn,setTurn] = useState(()=>{
+    const getTurnsFromStorage = getStorage('turn')
+    return getTurnsFromStorage ?? TURNS.X
+  })
   const [winner,setWinner] = useState(null)
 
   const resetGame = ()=>{
     setBoard(Array(9).fill(null))
     setTurn(TURNS.X)
     setWinner(null)
-  }
-
-  const checkWinner = (boardToCheck)=>{
-    for(const combo of WINNER_COMBOS){
-      const [a,b,c] = combo
-
-      if(
-        boardToCheck[a] &&
-        boardToCheck[a] === boardToCheck[b] &&
-        boardToCheck[a] === boardToCheck[c]
-      ){
-        return boardToCheck[a]
-      }
-    }
-    return null
+    clearStorage('board')
+    clearStorage('turn')
   }
 
   const updateBoard = (index)=>{
@@ -68,10 +35,14 @@ function App() {
     newBoard[index] = turn
     setBoard(newBoard)
     setTurn(newTurn)
+    updateStorage(newBoard,newTurn)
 
     const newWinner = checkWinner(newBoard)
     if(newWinner){
+      confetti()
       setWinner(newWinner)
+    }else if (checkEndGame(newBoard)){
+      setWinner(false)
     }
   }
 
